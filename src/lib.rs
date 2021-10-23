@@ -5,8 +5,10 @@
 //! javavm::set_jvm(None); // Pass a valid JavaVM instance here (hint: use the jni crate, which this crate already depends on)
 //! // ... Other code goes here
 //!
-//! // When you need the JNIEnv
-//! let env = javavm::get_env(); // Note: this will currently panic as we do not have a JavaVM set
+//! let handle = std::thread::spawn(|| {
+//!     // When you need the JNIEnv
+//!     let _ = javavm::get_env();
+//! });
 //! ```
 
 use jni::JNIEnv;
@@ -62,7 +64,12 @@ mod tests {
     #[test]
     #[should_panic]
     fn no_env() {
-        let _ = get_env();
+        // Get the env from another thread. This is probably more appropriate for an example
+        let handle = std::thread::spawn(|| {
+            let _ = get_env();
+        });
+
+        handle.join().unwrap();
     }
 
     #[test]
