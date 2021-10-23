@@ -1,0 +1,13 @@
+[package]
+name = "javavm"
+version = "0.1.0"
+edition = "2021"
+description = "A simple crate that caches the JavaVM structure globally and returns a valid JNIEnv for any thread, providing automatic thread attachment and detachment"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Hardebayho/javavm"
+keywords = ["jni", "java", "ffi"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+jni = {version = "0.19.0"}
