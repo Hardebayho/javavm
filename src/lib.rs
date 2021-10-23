@@ -2,7 +2,7 @@
 //! Note that you have to set the JavaVM once before you use the functions in this library. Failure to do that will make your program panic!
 //! # Example
 //! ```
-//! javavm::set_jvm(None); // Pass a valid JavaVM instance here (hint: use the jni crate)
+//! javavm::set_jvm(None); // Pass a valid JavaVM instance here (hint: use the jni crate, which this crate already depends on)
 //! // ... Other code goes here
 //!
 //! // When you need the JNIEnv
