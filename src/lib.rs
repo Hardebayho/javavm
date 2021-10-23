@@ -15,7 +15,6 @@ use jni::JavaVM;
 static mut VM: Option<JavaVM> = None;
 
 /// Sets the current JavaVM. All JNIEnv instances will come from this JavaVM
-/// [Panic]
 pub fn set_jvm(vm: Option<JavaVM>) {
     unsafe {
         VM = vm;
