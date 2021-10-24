@@ -86,6 +86,13 @@ pub fn load_class_cached(name: &str) -> Option<JClass<'static>> {
     get_class()
 }
 
+/// Cache this class. You can retrieve the class with the `load_class_cached` function, passing it the name given to this function. Note that this class will only be available for the "current thread". I do not know if the class instances are usable on multiple threads and until I'm sure about this, thread-local storage is what I'll stick to
+pub fn cache_class(name: &str, class: JClass<'static>) {
+    CACHED_CLASSES.with(|map| {
+        map.borrow_mut().insert(name.to_string(), class);
+    });
+}
+
 /// Unloads a cached class (if one exists). Does nothing if the class has not already been cached
 pub fn unload_cached_class(name: &str) {
     CACHED_CLASSES.with(|map| map.borrow_mut().remove(name));
