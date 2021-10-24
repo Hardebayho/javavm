@@ -11,10 +11,17 @@
 //! });
 //! ```
 
+use std::cell::RefCell;
+use std::collections::HashMap;
+
+use jni::objects::JClass;
 use jni::JNIEnv;
 use jni::JavaVM;
 
 static mut VM: Option<JavaVM> = None;
+thread_local! {
+    static CACHED_CLASSES: RefCell<HashMap<String, JClass<'static>>> = RefCell::new(HashMap::new());
+}
 
 /// Sets the current JavaVM. All JNIEnv instances will come from this JavaVM
 pub fn set_jvm(vm: Option<JavaVM>) {
@@ -48,6 +55,40 @@ pub fn get_env_safe() -> Option<JNIEnv<'static>> {
         Ok(env) => Some(env),
         Err(_) => None,
     }
+}
+
+/// Find and cache the JClass for the current thread. If the class has already been looked up, it returns the class and avoids any other expensive lookup without any other work on your part. The class will be automatically unloaded on program termination. If you want to unload a class before program termination, use `unload_cached_class(&str)`
+pub fn load_class_cached(name: &str) -> Option<JClass<'static>> {
+    let get_class = || -> Option<JClass> {
+        return CACHED_CLASSES.with(|map| -> Option<JClass> {
+            if map.borrow().contains_key(name) {
+                let res = *map.borrow().get(name).unwrap();
+                return Some(res);
+            }
+
+            None
+        });
+    };
+
+    let class = get_class();
+
+    if class.is_some() {
+        return class;
+    }
+
+    let env = get_env();
+    if let Ok(class) = env.find_class(name) {
+        CACHED_CLASSES.with(|map| {
+            map.borrow_mut().insert(name.to_string(), class);
+        });
+    }
+
+    get_class()
+}
+
+/// Unloads a cached class (if one exists). Does nothing if the class has not already been cached
+pub fn unload_cached_class(name: &str) {
+    CACHED_CLASSES.with(|map| map.borrow_mut().remove(name));
 }
 
 #[cfg(test)]
